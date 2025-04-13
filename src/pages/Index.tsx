@@ -1,8 +1,10 @@
 
 import React from 'react';
-import { ArrowDown, Github, FileText, ExternalLink } from 'lucide-react';
+import { ArrowDown, Github, FileText, ExternalLink, Cpu, Database, Layers, BarChart } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { ChartContainer } from "@/components/ui/chart";
 
 const Index = () => {
   return (
@@ -50,22 +52,154 @@ const Index = () => {
       <section id="introduction" className="py-20">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold mb-8 text-center">Introduction</h2>
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="space-y-4">
-              <p className="text-lg">
-                NoMaD presents a diffusion-based approach to robot navigation that effectively 
-                captures multimodal action distributions and generalizes to unseen environments. 
-                Unlike traditional reinforcement learning methods, our approach learns directly 
-                from expert demonstrations using goal-masked diffusion.
-              </p>
-              <p className="text-lg">
-                The method employs a conditional diffusion model to generate action 
-                sequences that guide the robot toward specified goals while avoiding obstacles and 
-                adhering to environmental constraints.
+          
+          {/* Abstract */}
+          <div className="mb-12">
+            <h3 className="text-2xl font-semibold mb-4">Abstract</h3>
+            <div className="bg-card rounded-lg p-6 border">
+              <p className="text-lg leading-relaxed">
+                This report presents our work on implementing and analyzing the training and
+                perception components of a visual navigation system based on diffusion policies, as
+                adapted from the NOMAD (Navigation with Goal Masked Diffusion) framework. Our
+                approach combines a visual perception backbone based on EfficientNet and Transformer,
+                with a trajectory diffusion model for motion planning to support both goal-directed
+                and exploratory navigation. We trained our model on the SACSon, RECON
+                and go stanford dataset, which features diverse real-world trajectories across various
+                environments and robot platforms. We leverage a conditional diffusion model to
+                generate multimodal waypoint predictions, enabling the agent to reason about complex,
+                uncertain navigation scenarios. Our contributions include a detailed breakdown of the
+                model architecture, training methodology, and evaluation metrics—particularly focusing
+                on waypoint alignment through cosine similarity. We have left out the deployment aspects.
               </p>
             </div>
-            <div className="bg-muted rounded-lg p-6 h-80 flex items-center justify-center">
-              <p className="text-muted-foreground text-center">System Architecture Diagram</p>
+          </div>
+          
+          {/* Main Introduction */}
+          <div className="mb-12">
+            <h3 className="text-2xl font-semibold mb-4">Introduction</h3>
+            <p className="text-lg mb-6 leading-relaxed">
+              Robotic learning for navigation in unfamiliar environments requires the ability to perform
+              both task-oriented navigation (i.e., reaching a known goal) and task-agnostic exploration
+              (i.e., searching for a goal in a novel environment). Traditionally, these functionalities are
+              tackled by separate systems — for example, using subgoal proposals, explicit planning modules,
+              or distinct navigation strategies for exploration and goal-reaching.
+            </p>
+            
+            {/* What is NoMaD */}
+            <div className="bg-muted p-6 rounded-lg mb-8">
+              <h4 className="text-xl font-semibold mb-4">What is NoMaD?</h4>
+              <p className="mb-4 leading-relaxed">
+                NoMaD is a transformer-based diffusion policy designed for long-horizon, memory-based
+                navigation, that can:
+              </p>
+              <ul className="list-disc pl-6 space-y-2 mb-4">
+                <li>Explore unknown places on its own (goal-agnostic behavior).</li>
+                <li>Go to a specific place or object when given a goal image (goal-directed behavior).</li>
+              </ul>
+              <p className="leading-relaxed">
+                Our project involves implementing the NoMaD Policy adapting its Transformer-based architecture
+                and conditional diffusion decoder to learn from a rich, multimodal dataset (SACSON, SCAND and RECON)
+                composed of real-world trajectories. Unlike traditional latent-variable models or methods that rely on
+                separate generative components for subgoal planning, the unified diffusion policy exhibits superior
+                generalization and robustness in unseen environments, while maintaining a compact model size.
+                In this report, we focus on the perception and training components of this policy, emphasizing how
+                a strong visual encoder combined with a diffusion-based decoder leads to improved alignment of predicted
+                and ground-truth waypoints. We analyze the training dynamics, present key quantitative metrics such as
+                cosine similarity and distance loss, and highlight the model's ability to generalize across diverse scenarios.
+              </p>
+            </div>
+          </div>
+          
+          {/* Implementation Details */}
+          <div>
+            <h3 className="text-2xl font-semibold mb-6">Implementation Details</h3>
+            
+            {/* Environment Setup */}
+            <div className="mb-8 bg-card rounded-lg p-6 border">
+              <div className="flex items-start gap-4">
+                <Cpu className="w-10 h-10 text-primary shrink-0 mt-1" />
+                <div>
+                  <h4 className="text-xl font-semibold mb-3">Environment Setup</h4>
+                  <p className="mb-2">
+                    All experiments were conducted on a system equipped with an NVIDIA GeForce GTX 1660
+                    SUPER GPU and a 12th Gen Intel® Core i9-12900K (24-core) processor.
+                  </p>
+                  <p className="mb-2">
+                    The code was implemented in Python 3.12.9 in a conda environment. All the packages and
+                    libraries used are listed in the requirements.txt file.
+                  </p>
+                  <p>
+                    The codebase was adapted from an open-source repository, and experiment tracking was
+                    performed using Weights & Biases (WandB) for logging loss curves, evaluation metrics,
+                    and hyperparameter sweeps.
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Data Pipeline */}
+            <div className="mb-8 bg-card rounded-lg p-6 border">
+              <div className="flex items-start gap-4">
+                <Database className="w-10 h-10 text-primary shrink-0 mt-1" />
+                <div>
+                  <h4 className="text-xl font-semibold mb-3">Data Pipeline</h4>
+                  <p className="mb-2">
+                    We trained the NoMaD model using the SACSoN and parts of RECON dataset, which
+                    contains diverse real-world trajectories across various environments and robot platforms.
+                  </p>
+                  <p>
+                    The SACSoN dataset was already processed and we it split into training and validation
+                    sets using 80-20 split ratio. The RECON dataset consisted of bag files, which needed to be
+                    preprocessed to extract RGB images, actions, and ground-truth waypoints.
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Training Procedure */}
+            <div className="bg-card rounded-lg p-6 border">
+              <div className="flex items-start gap-4">
+                <Layers className="w-10 h-10 text-primary shrink-0 mt-1" />
+                <div>
+                  <h4 className="text-xl font-semibold mb-3">Training Procedure</h4>
+                  <p className="mb-4">
+                    Training was done on a single NVIDIA GPU using a batch size of 32 for 10 epochs.
+                  </p>
+                  
+                  <h5 className="text-lg font-medium mb-2">Training Objective:</h5>
+                  <p className="mb-2">
+                    We calculate the Mean Squares Error(MSE) between the predicted and the actual noise. For
+                    overall loss function, we add the MSE temporal distance loss to the objective function.
+                  </p>
+                  <p className="mb-2 font-mono bg-muted p-2 rounded">
+                    LN oM aD (ϕ, ψ, f, θ, fd ) = M SE(ϵk , ϵθ (ct , a0t + ϵk , k)) + λ.M SE(d(ot , og ), fd (ct ))
+                  </p>
+                  <p className="mb-4">where:</p>
+                  <ul className="list-disc pl-6 space-y-1 mb-6">
+                    <li>ψ, ϕ correspond to the visual encoders for the observation and goal images.</li>
+                    <li>f corresponds to the transformer layers,</li>
+                    <li>θ corresponds to diffusion process parameters,</li>
+                    <li>fd corresponds to the temporal distance predictor.</li>
+                  </ul>
+                  
+                  <h5 className="text-lg font-medium mb-2">Training Configuration:</h5>
+                  <ul className="list-disc pl-6 space-y-1">
+                    <li>The weighting factor λ for the auxiliary distance loss was set to 10<sup>−4</sup>.</li>
+                    <li>The model was trained using the AdamW optimizer with a learning rate of 1e<sup>−4</sup> and
+                        a weight decay of 1e<sup>−2</sup>.</li>
+                    <li>We applied cosine annealing to decay the learning rate over time.</li>
+                    <li>We used goal masking with probability pm = 0.5, encouraging the model to generalize
+                        across goal-visible and goal-agnostic contexts.</li>
+                    <li>The diffusion process used a square cosine schedule with K = 10 denoising steps.</li>
+                    <li>The ViNT observation encoder was an EfficientNet-B0, mapping 96 × 96 RGB images
+                        into a 256-dimensional latent embedding.</li>
+                    <li>The transformer used for context encoding had 4 layers and 4 attention heads.</li>
+                    <li>Training checkpoints and EMA snapshots were saved at the end of each epoch for
+                        model tracking and potential evaluation.</li>
+                    <li>Training and validation loss curves were logged using Wandb for detailed inspection.</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -75,25 +209,254 @@ const Index = () => {
       <section id="results" className="py-20 bg-muted">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold mb-8 text-center">Results</h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {[1, 2, 3].map((item) => (
-              <Card key={item} className="overflow-hidden">
-                <div className="h-48 bg-secondary flex items-center justify-center">
-                  <p className="text-secondary-foreground">Result Visualization {item}</p>
+          
+          {/* Goal Conditioned Evaluation */}
+          <div className="mb-12">
+            <div className="bg-card rounded-lg p-6 border mb-6">
+              <h3 className="text-2xl font-semibold mb-4">Goal Conditioned (GC) Evaluation</h3>
+              <p className="mb-6">
+                We set the goal mask m = 0 to evaluate the model's performance in goal-directed navigation.
+              </p>
+              
+              {/* Distance Loss */}
+              <div className="mb-10">
+                <h4 className="text-xl font-medium mb-4">Distance Loss</h4>
+                <div className="grid md:grid-cols-2 gap-6 mb-4">
+                  <div className="bg-muted rounded-lg overflow-hidden">
+                    <AspectRatio ratio={16/9}>
+                      <div className="h-full w-full flex items-center justify-center">
+                        <p className="text-muted-foreground">Distance Loss Plot 1</p>
+                      </div>
+                    </AspectRatio>
+                  </div>
+                  <div className="bg-muted rounded-lg overflow-hidden">
+                    <AspectRatio ratio={16/9}>
+                      <div className="h-full w-full flex items-center justify-center">
+                        <p className="text-muted-foreground">Distance Loss Plot 2</p>
+                      </div>
+                    </AspectRatio>
+                  </div>
                 </div>
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold mb-2">Key Finding {item}</h3>
-                  <p className="text-muted-foreground">
-                    Description of important results and their implications for robot navigation systems.
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          <div className="mt-12 p-6 bg-card rounded-lg border">
-            <h3 className="text-xl font-semibold mb-4">Performance Metrics</h3>
-            <div className="h-80 bg-muted rounded flex items-center justify-center">
-              <p className="text-muted-foreground text-center">Performance Chart</p>
+                <p>
+                  We see that the loss has plateaued after the first epoch, both in test and training sets,
+                  indicating the model has learned to predict the distance to the goal.
+                </p>
+              </div>
+              
+              {/* Action Loss */}
+              <div className="mb-10">
+                <h4 className="text-xl font-medium mb-4">Action Loss</h4>
+                <div className="grid md:grid-cols-2 gap-6 mb-4">
+                  <div className="bg-muted rounded-lg overflow-hidden">
+                    <AspectRatio ratio={16/9}>
+                      <div className="h-full w-full flex items-center justify-center">
+                        <p className="text-muted-foreground">Action Loss Plot 1</p>
+                      </div>
+                    </AspectRatio>
+                  </div>
+                  <div className="bg-muted rounded-lg overflow-hidden">
+                    <AspectRatio ratio={16/9}>
+                      <div className="h-full w-full flex items-center justify-center">
+                        <p className="text-muted-foreground">Action Loss Plot 2</p>
+                      </div>
+                    </AspectRatio>
+                  </div>
+                </div>
+                <p className="text-sm text-center text-muted-foreground mt-2">
+                  Figure 3: Action loss comparison between training and validation sets under goal-conditioned evaluation.
+                </p>
+              </div>
+              
+              {/* GC Action Waypts Cos Sim */}
+              <div className="mb-10">
+                <h4 className="text-xl font-medium mb-4">GC Action Waypts Cos Sim</h4>
+                <div className="grid md:grid-cols-2 gap-6 mb-4">
+                  <div className="bg-muted rounded-lg overflow-hidden">
+                    <AspectRatio ratio={16/9}>
+                      <div className="h-full w-full flex items-center justify-center">
+                        <p className="text-muted-foreground">GC Action Waypts Plot 1</p>
+                      </div>
+                    </AspectRatio>
+                  </div>
+                  <div className="bg-muted rounded-lg overflow-hidden">
+                    <AspectRatio ratio={16/9}>
+                      <div className="h-full w-full flex items-center justify-center">
+                        <p className="text-muted-foreground">GC Action Waypts Plot 2</p>
+                      </div>
+                    </AspectRatio>
+                  </div>
+                </div>
+                <p className="text-sm text-center text-muted-foreground mt-2">
+                  Figure 4: Cosine similarity between predicted and ground-truth waypoints on the training and validation sets under goal-conditioned evaluation.
+                </p>
+              </div>
+              
+              {/* GC Multi Action Waypts Cos Sim */}
+              <div className="mb-10">
+                <h4 className="text-xl font-medium mb-4">GC Multi Action Waypts Cos Sim</h4>
+                <div className="grid md:grid-cols-2 gap-6 mb-4">
+                  <div className="bg-muted rounded-lg overflow-hidden">
+                    <AspectRatio ratio={16/9}>
+                      <div className="h-full w-full flex items-center justify-center">
+                        <p className="text-muted-foreground">GC Multi Action Waypts Plot 1</p>
+                      </div>
+                    </AspectRatio>
+                  </div>
+                  <div className="bg-muted rounded-lg overflow-hidden">
+                    <AspectRatio ratio={16/9}>
+                      <div className="h-full w-full flex items-center justify-center">
+                        <p className="text-muted-foreground">GC Multi Action Waypts Plot 2</p>
+                      </div>
+                    </AspectRatio>
+                  </div>
+                </div>
+                <p className="text-sm text-center text-muted-foreground mt-2">
+                  Figure 5: Cosine similarity between predicted and ground-truth multi-waypoints on the training and validation sets under goal-conditioned evaluation.
+                </p>
+              </div>
+            </div>
+            
+            {/* Additional Metrics */}
+            <div className="grid md:grid-cols-2 gap-6 mb-10">
+              {/* Distance Loss */}
+              <div className="bg-card rounded-lg p-6 border">
+                <h4 className="text-xl font-medium mb-4">Distance Loss</h4>
+                <div className="bg-muted rounded-lg overflow-hidden">
+                  <AspectRatio ratio={16/9}>
+                    <div className="h-full w-full flex items-center justify-center">
+                      <p className="text-muted-foreground">Additional Distance Loss Plot</p>
+                    </div>
+                  </AspectRatio>
+                </div>
+              </div>
+              
+              {/* Learning Rate */}
+              <div className="bg-card rounded-lg p-6 border">
+                <h4 className="text-xl font-medium mb-4">Learning Rate</h4>
+                <div className="bg-muted rounded-lg overflow-hidden">
+                  <AspectRatio ratio={16/9}>
+                    <div className="h-full w-full flex items-center justify-center">
+                      <p className="text-muted-foreground">Learning Rate Plot</p>
+                    </div>
+                  </AspectRatio>
+                </div>
+              </div>
+            </div>
+            
+            {/* Diffusion Loss */}
+            <div className="bg-card rounded-lg p-6 border mb-10">
+              <h4 className="text-xl font-medium mb-4">Diffusion Loss</h4>
+              <div className="grid md:grid-cols-2 gap-6 mb-4">
+                <div className="bg-muted rounded-lg overflow-hidden">
+                  <AspectRatio ratio={16/9}>
+                    <div className="h-full w-full flex items-center justify-center">
+                      <p className="text-muted-foreground">Diffusion Loss Plot 1</p>
+                    </div>
+                  </AspectRatio>
+                </div>
+                <div className="bg-muted rounded-lg overflow-hidden">
+                  <AspectRatio ratio={16/9}>
+                    <div className="h-full w-full flex items-center justify-center">
+                      <p className="text-muted-foreground">Diffusion Loss Plot 2</p>
+                    </div>
+                  </AspectRatio>
+                </div>
+                <div className="bg-muted rounded-lg overflow-hidden">
+                  <AspectRatio ratio={16/9}>
+                    <div className="h-full w-full flex items-center justify-center">
+                      <p className="text-muted-foreground">Diffusion Loss Plot 3</p>
+                    </div>
+                  </AspectRatio>
+                </div>
+                <div className="bg-muted rounded-lg overflow-hidden">
+                  <AspectRatio ratio={16/9}>
+                    <div className="h-full w-full flex items-center justify-center">
+                      <p className="text-muted-foreground">Diffusion Loss Plot 4</p>
+                    </div>
+                  </AspectRatio>
+                </div>
+              </div>
+              <p className="text-sm text-center text-muted-foreground mt-2">
+                Figure 8: Diffusion loss on training set and evaluation loss with different masking strategies
+              </p>
+            </div>
+            
+            {/* Total Loss */}
+            <div className="bg-card rounded-lg p-6 border mb-10">
+              <h4 className="text-xl font-medium mb-4">Total Loss</h4>
+              <div className="bg-muted rounded-lg overflow-hidden">
+                <AspectRatio ratio={21/9}>
+                  <div className="h-full w-full flex items-center justify-center">
+                    <p className="text-muted-foreground">Total Loss Plot</p>
+                  </div>
+                </AspectRatio>
+              </div>
+            </div>
+            
+            {/* Action Samples */}
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Train Action Samples */}
+              <div className="bg-card rounded-lg p-6 border">
+                <h4 className="text-xl font-medium mb-4">Train Action Samples</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-muted rounded-lg overflow-hidden">
+                    <AspectRatio ratio={1}>
+                      <div className="h-full w-full flex items-center justify-center">
+                        <p className="text-muted-foreground">Train Sample 1</p>
+                      </div>
+                    </AspectRatio>
+                  </div>
+                  <div className="bg-muted rounded-lg overflow-hidden">
+                    <AspectRatio ratio={1}>
+                      <div className="h-full w-full flex items-center justify-center">
+                        <p className="text-muted-foreground">Train Sample 2</p>
+                      </div>
+                    </AspectRatio>
+                  </div>
+                  <div className="bg-muted rounded-lg overflow-hidden">
+                    <AspectRatio ratio={1}>
+                      <div className="h-full w-full flex items-center justify-center">
+                        <p className="text-muted-foreground">Train Sample 3</p>
+                      </div>
+                    </AspectRatio>
+                  </div>
+                  <div className="bg-muted rounded-lg overflow-hidden">
+                    <AspectRatio ratio={1}>
+                      <div className="h-full w-full flex items-center justify-center">
+                        <p className="text-muted-foreground">Train Sample 4</p>
+                      </div>
+                    </AspectRatio>
+                  </div>
+                </div>
+              </div>
+              
+              {/* SACSON Test Action Samples */}
+              <div className="bg-card rounded-lg p-6 border">
+                <h4 className="text-xl font-medium mb-4">SACSON Test Action Samples</h4>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="bg-muted rounded-lg overflow-hidden">
+                    <AspectRatio ratio={1}>
+                      <div className="h-full w-full flex items-center justify-center">
+                        <p className="text-muted-foreground">Test Sample 1</p>
+                      </div>
+                    </AspectRatio>
+                  </div>
+                  <div className="bg-muted rounded-lg overflow-hidden">
+                    <AspectRatio ratio={1}>
+                      <div className="h-full w-full flex items-center justify-center">
+                        <p className="text-muted-foreground">Test Sample 2</p>
+                      </div>
+                    </AspectRatio>
+                  </div>
+                  <div className="bg-muted rounded-lg overflow-hidden">
+                    <AspectRatio ratio={1}>
+                      <div className="h-full w-full flex items-center justify-center">
+                        <p className="text-muted-foreground">Test Sample 3</p>
+                      </div>
+                    </AspectRatio>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -103,57 +466,95 @@ const Index = () => {
       <section id="comparison" className="py-20">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold mb-8 text-center">Comparison</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-muted border-b">
-                  <th className="p-4 text-left">Method</th>
-                  <th className="p-4 text-left">Success Rate</th>
-                  <th className="p-4 text-left">Path Efficiency</th>
-                  <th className="p-4 text-left">Generalization</th>
-                  <th className="p-4 text-left">Compute Requirements</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b hover:bg-muted/50">
-                  <td className="p-4 font-semibold">NoMaD (Ours)</td>
-                  <td className="p-4">95%</td>
-                  <td className="p-4">High</td>
-                  <td className="p-4">Excellent</td>
-                  <td className="p-4">Moderate</td>
-                </tr>
-                <tr className="border-b hover:bg-muted/50">
-                  <td className="p-4">Method A</td>
-                  <td className="p-4">82%</td>
-                  <td className="p-4">Medium</td>
-                  <td className="p-4">Good</td>
-                  <td className="p-4">Low</td>
-                </tr>
-                <tr className="border-b hover:bg-muted/50">
-                  <td className="p-4">Method B</td>
-                  <td className="p-4">78%</td>
-                  <td className="p-4">Low</td>
-                  <td className="p-4">Fair</td>
-                  <td className="p-4">High</td>
-                </tr>
-                <tr className="hover:bg-muted/50">
-                  <td className="p-4">Method C</td>
-                  <td className="p-4">90%</td>
-                  <td className="p-4">High</td>
-                  <td className="p-4">Poor</td>
-                  <td className="p-4">Very High</td>
-                </tr>
-              </tbody>
-            </table>
+          
+          <div className="bg-card rounded-lg p-6 border mb-10">
+            <h3 className="text-2xl font-semibold mb-6">Comparison with ViNT</h3>
+            <div className="grid md:grid-cols-2 gap-8 items-center mb-8">
+              <div>
+                <p className="mb-4 leading-relaxed">
+                  To establish a baseline, we trained the original ViNT architecture using the same dataset
+                  and training hyperparameters as used for NoMaD.
+                </p>
+                <p className="mb-4 leading-relaxed">
+                  We used the same EfficientNet-B0 encoder and transformer architecture, but without the
+                  diffusion decoder.
+                </p>
+                <p className="mb-4 leading-relaxed">
+                  We evaluated both models under identical conditions on the validation set, using metrics
+                  such as Mean Squared Error (MSE) for actions and cosine similarity between predicted and
+                  ground-truth waypoints.
+                </p>
+                <p className="leading-relaxed">
+                  Interestingly, we observed that in the goal-conditioned (GC) setting, both ViNT and
+                  NoMaD achieved comparable performance across key metrics. This suggests that the introduction
+                  of a diffusion-based decoder in NoMaD does not degrade performance in goal-directed
+                  planning tasks. Instead, it provides a more expressive generative mechanism while maintaining
+                  task performance.
+                </p>
+              </div>
+              <div className="bg-muted rounded-lg p-6">
+                <h4 className="text-xl font-medium mb-4 flex items-center">
+                  <BarChart className="mr-2 h-5 w-5" />
+                  Performance Comparison
+                </h4>
+                <div className="bg-card rounded-lg overflow-hidden">
+                  <AspectRatio ratio={4/3}>
+                    <div className="h-full w-full flex items-center justify-center">
+                      <p className="text-muted-foreground">Comparison Chart</p>
+                    </div>
+                  </AspectRatio>
+                </div>
+              </div>
+            </div>
+            
+            <p className="mb-6 leading-relaxed">
+              This supports the hypothesis that diffusion-based modeling can match deterministic
+              approaches in accuracy while offering better generative flexibility, particularly for
+              multi-modal or long-horizon planning scenarios.
+            </p>
+            
+            {/* Training Metrics */}
+            <div className="mb-8">
+              <h4 className="text-xl font-medium mb-4">Training Metrics</h4>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>Final training loss: 0.003</li>
+                <li>Cosine similarity: 0.47 (multi-action waypoints)</li>
+                <li>Distance loss: 10.2</li>
+              </ul>
+            </div>
+            
+            {/* Observations */}
+            <div>
+              <h4 className="text-xl font-medium mb-4">Observations</h4>
+              <p className="leading-relaxed">
+                Loss plateaued after around 5,000 batches. Training logs show improvement in cosine similarity 
+                and reduction in loss. Action losses remained stable across UC and GC branches.
+              </p>
+            </div>
           </div>
-          <div className="mt-8 bg-muted p-6 rounded-lg">
-            <h3 className="text-xl font-semibold mb-4">Key Advantages</h3>
-            <ul className="list-disc pl-6 space-y-2">
-              <li>Multimodal action distribution handling</li>
-              <li>Robust generalization to unseen environments</li>
-              <li>Sample efficiency during training</li>
-              <li>Reduced reliance on explicit reward engineering</li>
-            </ul>
+          
+          {/* More visual comparisons */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-card rounded-lg p-6 border">
+              <h4 className="text-xl font-medium mb-4">Model Architecture Comparison</h4>
+              <div className="bg-muted rounded-lg overflow-hidden">
+                <AspectRatio ratio={16/9}>
+                  <div className="h-full w-full flex items-center justify-center">
+                    <p className="text-muted-foreground">Architecture Comparison Diagram</p>
+                  </div>
+                </AspectRatio>
+              </div>
+            </div>
+            <div className="bg-card rounded-lg p-6 border">
+              <h4 className="text-xl font-medium mb-4">Performance Metrics</h4>
+              <div className="bg-muted rounded-lg overflow-hidden">
+                <AspectRatio ratio={16/9}>
+                  <div className="h-full w-full flex items-center justify-center">
+                    <p className="text-muted-foreground">Performance Metrics Chart</p>
+                  </div>
+                </AspectRatio>
+              </div>
+            </div>
           </div>
         </div>
       </section>
