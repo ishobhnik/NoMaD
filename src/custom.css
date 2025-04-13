@@ -1,0 +1,10 @@
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+/* Adding some transitions for smoother hover effects */
+a, button {
+  transition: all 0.2s ease-in-out;
+}
